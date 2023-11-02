@@ -14,8 +14,7 @@ template AgeAbove18() {
     greaterThan.in[0] <== age;
     greaterThan.in[1] <== 18;
 
-    out <-- greaterThan.out;
-    out === 1;
+    out <== greaterThan.out;
 }
 
 component main = AgeAbove18();
