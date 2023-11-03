@@ -12,9 +12,10 @@ template AgeAbove18() {
     // 8 = number of bits
     component greaterThan = GreaterThan(8); 
     greaterThan.in[0] <== age;
-    greaterThan.in[1] <== 18;
+    greaterThan.in[1] <== 17; // 18 is considered 18+ so 17 is the limit
 
-    out <== greaterThan.out;
+    out <-- greaterThan.out;
+    out === 1;
 }
 
 component main = AgeAbove18();
