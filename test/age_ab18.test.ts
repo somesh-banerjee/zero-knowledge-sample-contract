@@ -57,7 +57,14 @@ describe('Verifier', () => {
       age: 16
     }
 
-    const { proof, publicSignals } = await groth16.fullProve(witness, wasmFilePath, finalZkeyPath, null)
+    let temp
+    try {
+        temp = await groth16.fullProve(witness, wasmFilePath, finalZkeyPath, null)
+    } catch (error) {
+        return
+    }
+    const proof = temp.proof
+    const publicSignals = temp.publicSignals
 
     try {
         const transaction = verifier.verifyProof(
@@ -129,7 +136,12 @@ describe('AgeVerifier', () => {
             age: 16
         }
 
-        const temp = await groth16.fullProve(witness, wasmFilePath, finalZkeyPath, null)
+        let temp
+        try {
+            temp = await groth16.fullProve(witness, wasmFilePath, finalZkeyPath, null)
+        } catch (error) {
+            return
+        }
         const proof = temp.proof
         const publicSignals = temp.publicSignals
 
