@@ -31,6 +31,25 @@ describe('AgeVerifier', () => {
         
     expect(transaction).to.be.equal(true)
   })
+  
+  it('Should return true if age is 18', async () => {
+    const witness = {
+      age: 18
+    }
+
+    const { proof, publicSignals } = await groth16.fullProve(witness, wasmFilePath, finalZkeyPath, null)
+
+    const transaction = await verifier.verifyProof(
+        [proof.pi_a[0], proof.pi_a[1],], 
+        [
+        [proof.pi_b[0][1], proof.pi_b[0][0],],
+        [proof.pi_b[1][1], proof.pi_b[1][0],]
+      ],
+      [proof.pi_c[0], proof.pi_c[1]],
+        publicSignals)
+        
+    expect(transaction).to.be.equal(true)
+  })
 
   it('Should return false if age is below 18', async () => {
     const witness = {
@@ -39,19 +58,17 @@ describe('AgeVerifier', () => {
 
     const { proof, publicSignals } = await groth16.fullProve(witness, wasmFilePath, finalZkeyPath, null)
 
-    try {
-        const transaction = verifier.verifyProof(
-            [proof.pi_a[0], proof.pi_a[1],], 
-            [
-            [proof.pi_b[0][1], proof.pi_b[0][0],],
-            [proof.pi_b[1][1], proof.pi_b[1][0],]
-          ],
-          [proof.pi_c[0], proof.pi_c[1]],
-            publicSignals
-        )
-    } catch (error) {
-        
-    }
+    const transaction = await verifier.verifyProof(
+        [proof.pi_a[0], proof.pi_a[1],], 
+        [
+        [proof.pi_b[0][1], proof.pi_b[0][0],],
+        [proof.pi_b[1][1], proof.pi_b[1][0],]
+        ],
+        [proof.pi_c[0], proof.pi_c[1]],
+        publicSignals
+    )
+
+    expect(transaction).to.be.equal(false)
         
 
   })
