@@ -1,7 +1,7 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { generateProof } from "./utils/generate_proof"
 import ABI from "./utils/abi.json"
-import { useConnect, useContractWrite, usePrepareContractWrite } from 'wagmi'
+import { useAccount, useConnect, useContractWrite, usePrepareContractWrite } from 'wagmi'
 
 function App() {
     const [age, setAge] = useState<number | undefined>(undefined)
@@ -15,9 +15,10 @@ function App() {
         publicSignals: [0]
     })
 
-    const { connect, connectors } = useConnect()
-    const { config: prepareContractWriteConfig } = usePrepareContractWrite({
-        address: "0x2B7e5A273112F54140FD0F2Af05aAEDF1Ec32053",
+    const { connect, connectors} = useConnect()
+    const { isConnected } = useAccount()
+    const { config: prepareContractWriteConfig, refetch: rePrepare } = usePrepareContractWrite({
+        address: "0x7f32cC539C6954757086F07eAB39004F7da5b995",
         abi: ABI,
         functionName: "verifyProof",
        args: [
@@ -27,11 +28,11 @@ function App() {
                 [snark.proof.pi_b[1][1], snark.proof.pi_b[1][0]]
             ],
             [snark.proof.pi_c[0], snark.proof.pi_c[1]],
-            [snark.publicSignals[0]]
+            snark.publicSignals
         ],
     })
 
-    const { data, write } = useContractWrite({
+    const { write } = useContractWrite({
         ...prepareContractWriteConfig,
         onError: (error) => {
             console.log(error)
@@ -45,10 +46,24 @@ function App() {
     //     hash: data?.hash,
     // })
 
+    useEffect(() => {
+        const fn = async () => {
+            await rePrepare()
+            write?.()
+        }
+
+        fn()
+    }, [snark, write])
+
+
+
+
     
     async function handleAgeSubmit() {
-
-        connect({connector : connectors[0]})
+        if (!isConnected){
+            connect({connector : connectors[0]})
+            return
+        }
 
         if (age === undefined) {
             alert("Please enter your age")
@@ -61,15 +76,7 @@ function App() {
             alert("Error generating proof")
             return
         }
-        write?.()
-        setSnark({
-            proof: {
-                pi_a: [0, 0],
-                pi_b: [[0, 0], [0, 0]],
-                pi_c: [0, 0]
-            },
-            publicSignals: [0]
-        })
+        
     }
 
     function handleWalletSubmit(): void {
