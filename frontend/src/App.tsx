@@ -1,12 +1,22 @@
 import { useState } from "react"
+import { generateProof } from "./utils/generate_proof"
 
 function App() {
     const [age, setAge] = useState<number | undefined>(undefined)
     const [wallet, setWallet] = useState<string | undefined>(undefined)
     
 
-    function handleAgeSubmit(): void {
-        throw new Error("Function not implemented.")
+    async function handleAgeSubmit() {
+        if (age === undefined) {
+            alert("Please enter your age")
+            return
+        }
+        try {
+            const proof = await generateProof(age)
+            console.log(proof)
+        } catch (error) {
+            alert("Error generating proof")
+        }
     }
 
     function handleWalletSubmit(): void {
